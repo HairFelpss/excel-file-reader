@@ -12,8 +12,6 @@ import { ExternalDataService } from './external-data.service';
 import { CreateExternalDataDto } from './dto/create-external-data.dto';
 import { ApiConsumes } from '@nestjs/swagger';
 
-import * as XLSX from 'xlsx';
-
 @Controller()
 export class ExternalDataController {
   constructor(private readonly externalDataService: ExternalDataService) {}
@@ -26,24 +24,17 @@ export class ExternalDataController {
     @UploadedFile() file: Express.Multer.File,
   ) {
     try {
-      const wb: XLSX.WorkBook = XLSX.read(file.buffer, { codepage: 23 });
+      console.log({ file, body });
+      const rows = this.externalDataService.getRows(file.buffer);
 
-      const revenueCalc = wb.SheetNames.find(
-        (sheet) => sheet === 'Cálculo da Receita',
-      );
-      const ws: XLSX.WorkSheet = wb.Sheets[revenueCalc];
+      const filteredRows = this.externalDataService.filterRows(rows);
 
-      const jsonData = XLSX.utils.sheet_to_json(ws);
+      const mounth = this.externalDataService.getMonthName(rows);
 
-      const rows = JSON.parse(JSON.stringify(jsonData));
-
-      if (rows.length <= 1) {
-        throw 'File is empty!';
-      }
-
-      return rows;
+      return { mounth, inputs: filteredRows };
     } catch (err) {
       console.log('err ==> ', err);
+      return '----------------------- deu ruim -----------------------';
     }
   }
 
