@@ -34,7 +34,7 @@ export class ExternalDataController {
       return { mounth, inputs: filteredRows };
     } catch (err) {
       console.log('err ==> ', err);
-      return '----------------------- deu ruim -----------------------';
+      return err;
     }
   }
 
